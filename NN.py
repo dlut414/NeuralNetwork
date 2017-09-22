@@ -43,6 +43,7 @@ class NN:
         self.Layers = Layers;
         self.alpha = alpha;
         self.reg = reg;
+        self.Layers = Layers;
         self.nLayer = len(Layers);
         self.Neurons = [];
         self.Neurons.append( Neuron(Layers[0], 1, ReLU, dReLU) );
@@ -105,4 +106,27 @@ class NN:
         self.fscore = 0.0;
         if self.precision + self.recall > 0:
             self.fscore = 2*self.precision*self.recall / (self.precision + self.recall);
+        return;
+
+    def save(self, filename):
+        import json;
+        data = {};
+        data.update({'nLayer':self.nLayer, 'alpha':self.alpha, 'reg':self.reg});
+        data.update({'Layers':self.Layers});
+        for i in range(0, self.nLayer):
+            data.update({'w'+str(i):self.Neurons[i].w.tolist()});
+            data.update({'b'+str(i):self.Neurons[i].b.tolist()});
+            data.update({'fun'+str(i):self.Neurons[i].g.__name__});
+        with open(filename, 'w') as json_data:
+            json.dump(data, json_data);
+        return;
+
+    def load(self, filename):
+        import json;
+        with open(filename, 'r') as json_data:
+            data = json.load(json_data);
+            self.__init__(data['Layers'], data['alpha'], data['reg']);
+            for i in range(0, data['nLayer']):
+                self.Neurons[i].w = np.array(data['w'+str(i)], ndmin=2);
+                self.Neurons[i].b = np.array(data['b'+str(i)], ndmin=2);
         return;
