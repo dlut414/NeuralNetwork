@@ -20,6 +20,10 @@ def LReLU(z):
 def dLReLU(z):
     return 1.0* (z >= 0) + 0.01* (z < 0);
 
+gDict = {'sigmoid':sigmoid, 'dSigmoid':dSigmoid,
+         'ReLU':ReLU, 'dReLU':dReLU,
+         'LReLU':LReLU, 'dLReLU':dLReLU};
+
 class Neuron:
     def __init__(self, nCur, nPre, g, dg, winit=0.1):
         self.nCur = nCur;
@@ -116,7 +120,8 @@ class NN:
         for i in range(0, self.nLayer):
             data.update({'w'+str(i):self.Neurons[i].w.tolist()});
             data.update({'b'+str(i):self.Neurons[i].b.tolist()});
-            data.update({'fun'+str(i):self.Neurons[i].g.__name__});
+            data.update({'g'+str(i):self.Neurons[i].g.__name__});
+            data.update({'dg'+str(i):self.Neurons[i].dg.__name__});
         with open(filename, 'w') as json_data:
             json.dump(data, json_data);
         return;
@@ -129,4 +134,6 @@ class NN:
             for i in range(0, data['nLayer']):
                 self.Neurons[i].w = np.array(data['w'+str(i)], ndmin=2);
                 self.Neurons[i].b = np.array(data['b'+str(i)], ndmin=2);
+                self.Neurons[i].g = gDict[data['g'+str(i)]];
+                self.Neurons[i].dg = gDict[data['dg'+str(i)]];
         return;
